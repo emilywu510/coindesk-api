@@ -22,10 +22,10 @@ import static org.mockito.Mockito.when;
 public class CoindeskServiceTest {
 
     @Autowired
-    private CoindeskService service;
+    private CoindeskService coindeskService;
 
     @MockBean
-    private CurrencyRepository mockRepo;
+    private CurrencyRepository currencyRepository;
 
     @MockBean
     private RestTemplate restTemplate;
@@ -39,7 +39,8 @@ public class CoindeskServiceTest {
         when(restTemplate.getForObject("https://api.coindesk.com/v1/bpi/currentprice.json", String.class))
                 .thenThrow(new RuntimeException("Mock API failure"));
 
-        Map<String, Object> result = service.fetchOriginalData();
+        // 驗證fallback成功
+        Map<String, Object> result = coindeskService.fetchOriginalData();
 
         assertTrue(result.containsKey("bpi"));
         Map<String, Object> bpi = (Map<String, Object>) result.get("bpi");
@@ -54,19 +55,21 @@ public class CoindeskServiceTest {
     }
     @Test
     void testConvertDataParsesCorrectly() throws Exception {
+
+        //正確轉換外部API資料成DTO，並成功解密資料庫中的匯率資訊
         String encryptedRate = cryptoUtil.encrypt("23342.0112");
 
         Currency currency = CurrencyFactory.create("USD", "美元");
         currency.setRateEncrypted(encryptedRate);
 
-        when(mockRepo.findByCode("USD")).thenReturn(Optional.of(currency));
+        when(currencyRepository.findByCode("USD")).thenReturn(Optional.of(currency));
 
         Map<String, Object> mockJson = Map.of(
                 "time", Map.of("updatedISO", "2022-08-03T20:25:00+00:00"),
                 "bpi", Map.of("USD", Map.of("rate_float", 23342.0112))
         );
 
-        CoindeskResponseDTO dto = service.convertData(mockJson);
+        CoindeskResponseDTO dto = coindeskService.convertData(mockJson);
 
         assertEquals("2022/08/03 20:25:00", dto.getUpdateTime());
         assertEquals("美元", dto.getCurrencyList().get(0).getName());

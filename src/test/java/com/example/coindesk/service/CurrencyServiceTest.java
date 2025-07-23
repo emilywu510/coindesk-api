@@ -45,6 +45,7 @@ class CurrencyServiceTest {
 
         assertEquals(2, result.size());
         assertEquals("EUR", result.get(0).getCode());
+        // 呼叫一次
         verify(currencyRepository, times(1)).findAllByOrderByCodeAsc();
     }
 

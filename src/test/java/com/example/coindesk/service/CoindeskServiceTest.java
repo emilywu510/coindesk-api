@@ -4,6 +4,7 @@ import com.example.coindesk.dto.CoindeskResponseDTO;
 import com.example.coindesk.entity.Currency;
 import com.example.coindesk.factory.CurrencyFactory;
 import com.example.coindesk.repository.CurrencyRepository;
+import com.example.coindesk.util.CryptoUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,9 @@ public class CoindeskServiceTest {
     @MockBean
     private RestTemplate restTemplate;
 
+    @Autowired
+    private CryptoUtil cryptoUtil;
+
     @Test
     void testFetchOriginalDataFallbackOnFailure() {
         // 模擬呼叫API時丟出例外
@@ -50,7 +54,7 @@ public class CoindeskServiceTest {
     }
     @Test
     void testConvertDataParsesCorrectly() throws Exception {
-        String encryptedRate = com.example.coindesk.util.CryptoUtil.encrypt("23342.0112");
+        String encryptedRate = cryptoUtil.encrypt("23342.0112");
 
         Currency currency = CurrencyFactory.create("USD", "美元");
         currency.setRateEncrypted(encryptedRate);

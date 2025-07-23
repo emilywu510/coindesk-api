@@ -30,6 +30,9 @@ public class CoindeskService {
     @Autowired
     private RateParserStrategy rateParserStrategy;
 
+    @Autowired
+    private CryptoUtil cryptoUtil;
+
     private final String API = "https://api.coindesk.com/v1/bpi/currentprice.json";
 
     public Map<String, Object> fetchOriginalData() {
@@ -45,6 +48,7 @@ public class CoindeskService {
         } catch (Exception e) {
             log.warn("Failed to call CoinDesk API, using fallback data", e);
             try {
+                //讀取coindesk API失敗時，使用mocking data
                 ObjectMapper mapper = new ObjectMapper();
                 InputStream is = getClass().getClassLoader().getResourceAsStream("mock/coindesk-response.json");
                 Map<String, Object> fallback = mapper.readValue(is, Map.class);
@@ -75,8 +79,9 @@ public class CoindeskService {
                     .orElse("未知幣別");
 
             Double decryptedRate = currencyRepository.findByCode(code)
-                    .map(Currency::getDecryptedRate)
-                    // 如果沒加密值就用原值
+                    .map(Currency::getRateEncrypted)
+                    .map(cryptoUtil::decrypt)
+                    .map(Double::parseDouble)
                     .orElse(entry.getValue());
 
             list.add(new CoindeskResponseDTO.CurrencyInfo(code, name, decryptedRate));
@@ -103,7 +108,7 @@ public class CoindeskService {
                 double rate = entry.getValue();
 
                 currencyRepository.findByCode(code).ifPresent(currency -> {
-                    currency.setRateEncrypted(CryptoUtil.encrypt(String.valueOf(rate)));
+                    currency.setRateEncrypted(cryptoUtil.encrypt(String.valueOf(rate)));
                     currency.setUpdatedTime(updatedTime);
                     currencyRepository.save(currency);
                     log.info("Updated currency {} with rate {} at {}", code, rate, updatedTime);

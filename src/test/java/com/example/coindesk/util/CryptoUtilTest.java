@@ -1,21 +1,25 @@
 package com.example.coindesk.util;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CryptoUtilTest {
 
+    @Autowired
+    private CryptoUtil cryptoUtil;
+
     @Test
     public void testEncryptAndDecrypt() {
         String original = "23342.0112";
 
-        String encrypted = CryptoUtil.encrypt(original);
+        String encrypted = cryptoUtil.encrypt(original);
         assertNotNull(encrypted);
         // 加密結果應與原本不同
         assertNotEquals(original, encrypted);
 
-        String decrypted = CryptoUtil.decrypt(encrypted);
+        String decrypted = cryptoUtil.decrypt(encrypted);
         // 解密應還原
         assertEquals(original, decrypted);
     }
@@ -25,7 +29,7 @@ public class CryptoUtilTest {
         String invalidEncrypted = "INVALIDDATA";
 
         assertThrows(RuntimeException.class, () -> {
-            CryptoUtil.decrypt(invalidEncrypted);
+            cryptoUtil.decrypt(invalidEncrypted);
         });
     }
 }

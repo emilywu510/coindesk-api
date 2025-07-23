@@ -32,3 +32,6 @@ springdoc:
 mock:
   enabled: false
 
+crypto:
+  secret: CoindeskSecretKey3344555
+

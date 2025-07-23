@@ -17,6 +17,7 @@ public class CoindeskController {
 
     @GetMapping("/raw")
     public Map<String, Object> fetchRawFromCoindesk() {
+
         return coindeskService.fetchOriginalData();
     }
 

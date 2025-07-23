@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ParserConfig {
 
+    // 預設false
     @Value("${mock.enabled:false}")
     private boolean mockEnabled;
 

@@ -1,5 +1,6 @@
 package com.example.coindesk.util;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -8,13 +9,14 @@ import java.util.Base64;
 
 @Component
 public class CryptoUtil {
-    private static final String SECRET = "CoindeskSecretKey3344555";
-    private static final String ALGO = "AES";
 
-    public static String encrypt(String plainText) {
+    @Value("${crypto.secret}")
+    private String secret;
+
+    public  String encrypt(String plainText) {
         try {
-            SecretKeySpec key = new SecretKeySpec(SECRET.getBytes(), ALGO);
-            Cipher cipher = Cipher.getInstance(ALGO);
+            SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] encrypted = cipher.doFinal(plainText.getBytes());
             return Base64.getEncoder().encodeToString(encrypted);
@@ -23,10 +25,10 @@ public class CryptoUtil {
         }
     }
 
-    public static String decrypt(String cipherText) {
+    public String decrypt(String cipherText) {
         try {
-            SecretKeySpec key = new SecretKeySpec(SECRET.getBytes(), ALGO);
-            Cipher cipher = Cipher.getInstance(ALGO);
+            SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(cipherText));
             return new String(decrypted);

@@ -30,19 +30,5 @@ public class Currency {
     @Column(name = "updated_time")
     private LocalDateTime updatedTime;
 
-    // 取得解密匯率
-    @Transient
-    private Double decryptedRate;
-
-    public Double getDecryptedRate() {
-        if (rateEncrypted != null) {
-            try {
-                return Double.parseDouble(com.example.coindesk.util.CryptoUtil.decrypt(rateEncrypted));
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
 
 }

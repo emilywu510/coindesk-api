@@ -56,7 +56,6 @@ public class CurrencyService {
 
     public Currency update(Long id, Currency currency, Locale locale) {
         Currency existing = repository.findById(id).orElseThrow(() -> new RuntimeException(messageSource.getMessage("currency.notfound", null, locale)));
-        existing.setCode(currency.getCode());
         existing.setName(currency.getName());
         return repository.save(existing);
     }

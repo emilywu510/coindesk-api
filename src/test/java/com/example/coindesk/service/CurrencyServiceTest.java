@@ -3,15 +3,13 @@ package com.example.coindesk.service;
 import com.example.coindesk.entity.Currency;
 import com.example.coindesk.factory.CurrencyFactory;
 import com.example.coindesk.repository.CurrencyRepository;
+import com.example.coindesk.util.CryptoUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.context.MessageSource;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -26,6 +24,12 @@ class CurrencyServiceTest {
 
     @Mock
     private MessageSource messageSource;
+
+    @Mock
+    private CoindeskService coindeskService;
+
+    @Mock
+    private CryptoUtil cryptoUtil;
 
     @BeforeEach
     void setUp() {
@@ -51,15 +55,21 @@ class CurrencyServiceTest {
 
     @Test
     void testCreate() {
-        Currency newCurrency = CurrencyFactory.create( "JPY", "日圓");
-        Currency savedCurrency = CurrencyFactory.create(3L, "JPY", "日圓");
+        Map<String, Object> mockData = Map.of(
+                "bpi", Map.of("USD", Map.of("rate_float", 23342.0112)
+                ), "time", Map.of("updatedISO", "2022-08-03T20:25:00+00:00")
+        );
 
-        when(currencyRepository.save(newCurrency)).thenReturn(savedCurrency);
+        when(coindeskService.fetchOriginalData()).thenReturn(mockData);
+
+        Currency newCurrency = CurrencyFactory.create("USD", "美元");
+        when(currencyRepository.save(any())).thenReturn(newCurrency);
 
         Currency result = currencyService.create(newCurrency);
 
-        assertEquals("JPY", result.getCode());
-        verify(currencyRepository, times(1)).save(newCurrency);
+        assertEquals("USD", result.getCode());
+        verify(coindeskService).fetchOriginalData();
+        verify(currencyRepository).save(any());
     }
 
     @Test

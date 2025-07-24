@@ -13,6 +13,7 @@ import java.util.Locale;
 @Configuration
 public class LocaleConfig implements WebMvcConfigurer {
 
+    //語言資訊儲存在使用者的 Session 中
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver resolver = new SessionLocaleResolver();
@@ -27,8 +28,10 @@ public class LocaleConfig implements WebMvcConfigurer {
         return interceptor;
     }
 
+    //語言切換攔截器加進Spring的處理流程中
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
         registry.addInterceptor(localeChangeInterceptor());
     }
 }
